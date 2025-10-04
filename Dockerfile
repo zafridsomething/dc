@@ -7,26 +7,28 @@ ENV LLAMA_SERVER_PORT=8080
 ENV MODEL_NAME=Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF-Q8_0.gguf
 ENV MODEL_URL=https://huggingface.co/DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF/resolve/main/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF-Q8_0.gguf
 
-# Install dependencies
+# Install dependencies, including cmake
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     git \
-    wget && \
+    wget \
+    cmake && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone and compile llama.cpp
+# Clone and compile llama.cpp using cmake
 RUN git clone https://github.com/ggerganov/llama.cpp.git /opt/llama.cpp
 WORKDIR /opt/llama.cpp
-RUN make -j$(nproc) server LLAMA_CUDA=1
+RUN cmake -B build -DGGML_CUDA=ON && \
+    cmake --build build --config Release
 
 # Download the model
 RUN mkdir -p /models && \
     wget -O /models/${MODEL_NAME} ${MODEL_URL}
 
-# Expose port and set the command to run the server
+# Expose port and set the command to run the server from its new location
 EXPOSE ${LLAMA_SERVER_PORT}
-CMD ["/opt/llama.cpp/server", \
+CMD ["/opt/llama.cpp/build/bin/server", \
      "-m", "/models/${MODEL_NAME}", \
      "-c", "131072", \
      "--port", "${LLAMA_SERVER_PORT}", \
