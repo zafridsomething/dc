@@ -8,9 +8,9 @@ The image is built using `llama.cpp` with full NVIDIA CUDA acceleration, making 
 
 -   **`Dockerfile`**: This is the blueprint for our custom image. It handles all the necessary steps:
     -   Starts from an official NVIDIA CUDA base image.
-    -   Installs all required system dependencies (`build-essential`, `git`, `wget`).
+    -   Installs all required system dependencies (`build-essential`, `git`, `wget`, `cmake`, `libcurl4-openssl-dev`).
     -   Clones the `llama.cpp` repository from GitHub.
-    -   Compiles the `llama.cpp` server with CUDA support (`LLAMA_CUDA=1`) to leverage the GPU.
+    -   Compiles the `llama.cpp` server with CUDA support (`LLAMA_CUDA=1`) using `cmake`.
     -   Downloads the high-quality `Q8_0` version of the model.
     -   Configures the server to start automatically with parameters optimized for your use case (128k context, 4 experts, all layers offloaded to GPU).
 

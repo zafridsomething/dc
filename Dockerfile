@@ -7,19 +7,20 @@ ENV LLAMA_SERVER_PORT=8080
 ENV MODEL_NAME=Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF-Q8_0.gguf
 ENV MODEL_URL=https://huggingface.co/DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF/resolve/main/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF-Q8_0.gguf
 
-# Install dependencies, including cmake
+# Install dependencies, including cmake and libcurl
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     git \
     wget \
-    cmake && \
+    cmake \
+    libcurl4-openssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone and compile llama.cpp using cmake
+# Clone and compile llama.cpp using cmake with specific CUDA architecture
 RUN git clone https://github.com/ggerganov/llama.cpp.git /opt/llama.cpp
 WORKDIR /opt/llama.cpp
-RUN cmake -B build -DGGML_CUDA=ON && \
+RUN cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 && \
     cmake --build build --config Release
 
 # Download the model
